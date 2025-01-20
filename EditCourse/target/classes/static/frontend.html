@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+</head>
+<body>
+<h1>Edit Course</h1>
+<form id="editForm">
+    Course ID: <input type="number" name="id" required><br>
+    New Name: <input type="text" name="name"><br>
+    New Description: <input type="text" name="description"><br>
+    <button type="submit">Edit Course</button>
+</form>
+
+<h1>Remove Course</h1>
+<form id="removeForm">
+    Course ID: <input type="number" name="id" required><br>
+    <button type="submit">Remove Course</button>
+</form>
+
+<div id="message"></div>
+
+<script>
+    // Load course data from the backend
+    fetch('/courses')
+        .then(response => response.json())
+        .then(data => {
+            // Process the data and display it on your website
+            console.log(data);
+            // You can update the UI to display the loaded courses
+        })
+        .catch(error => console.error('Error:', error));
+
+    document.getElementById('editForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const courseId = formData.get('id');
+        const updatedCourse = {
+            name: formData.get('name'),
+            description: formData.get('description')
+        };
+
+        fetch(`/courses/${courseId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedCourse)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => Promise.reject(error.message));
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+                document.getElementById('message').style.color = 'green';
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = error;
+                document.getElementById('message').style.color = 'red';
+            });
+    });
+
+    document.getElementById('removeForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const courseId = document.querySelector('#removeForm input[name="id"]').value;
+
+        fetch(`/courses/${courseId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => Promise.reject(error.message));
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+                document.getElementById('message').style.color = 'green';
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = error;
+                document.getElementById('message').style.color = 'red';
+            });
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Courses</title>
+</head>
+<body>
+<h1>Search Courses</h1>
+<form id="search-course-form">
+    <label for="query">Search:</label>
+    <input type="text" id="query" name="query" required><br>
+    <label for="sortBy">Sort By:</label>
+    <select id="sortBy" name="sortBy">
+        <option value="">None</option>
+        <option value="rating">Rating</option>
+    </select><br>
+    <button type="submit">Search</button>
+</form>
+
+<h2>Search Results</h2>
+<div id="search-results"></div>
+
+<script>
+    document.getElementById('search-course-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        const query = formData.get('query');
+        const sortBy = formData.get('sortBy');
+
+        fetch(`/search-courses/search?query=${query}&sortBy=${sortBy}`)
+            .then(response => response.json())
+            .then(data => {
+                const searchResults = document.getElementById('search-results');
+                searchResults.innerHTML = ''; // Clear previous search results
+
+                if (data.length === 0) {
+                    searchResults.textContent = 'No courses found.';
+                } else {
+                    data.forEach(course => {
+                        const courseDiv = document.createElement('div');
+                        courseDiv.textContent = `Name: ${course.name}, Duration: ${course.duration}, Category: ${course.category}, Rating: ${course.rating}, Capacity: ${course.capacity}, Enrolled Students: ${course.enrolledStudents}, Reviews: ${course.reviews}`;
+                        searchResults.appendChild(courseDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error searching courses:', error);
+            });
+    });
+</script>
+</body>
+</html>

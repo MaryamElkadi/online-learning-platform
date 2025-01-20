@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Course Management</h2>
+
+    <!-- Form to edit a course -->
+    <form id="editForm" class="input-group">
+        <label for="id">Course ID:</label>
+        <input type="number" id="id" name="id" required>
+        <label for="name">New Name:</label>
+        <input type="text" id="name" name="name">
+        <label for="description">New Description:</label>
+        <input type="text" id="description" name="description">
+        <button class="btn" type="submit">Edit Course</button>
+    </form>
+
+    <!-- Form to remove a course -->
+    <form id="removeForm" class="input-group">
+        <label for="removeId">Course ID:</label>
+        <input type="number" id="removeId" name="id" required>
+        <button class="btn" type="submit">Remove Course</button>
+    </form>
+
+    <!-- Message display area -->
+    <div id="message" class="result"></div>
+</div>
+
+<script>
+    // Function to edit a course
+    document.getElementById('editForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const courseId = formData.get('id');
+        const updatedCourse = {
+            name: formData.get('name'),
+            description: formData.get('description')
+        };
+
+        fetch(`/courses/${courseId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedCourse)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => Promise.reject(error.message));
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+                document.getElementById('message').style.color = 'green';
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = error;
+                document.getElementById('message').style.color = 'red';
+            });
+    });
+
+    // Function to remove a course
+    document.getElementById('removeForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const courseId = document.getElementById('removeId').value;
+
+        fetch(`/courses/${courseId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => Promise.reject(error.message));
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+                document.getElementById('message').style.color = 'green';
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = error;
+                document.getElementById('message').style.color = 'red';
+            });
+    });
+</script>
+</body>
+</html>
